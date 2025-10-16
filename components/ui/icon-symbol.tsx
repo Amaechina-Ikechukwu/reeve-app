@@ -1,41 +1,46 @@
-// Fallback for using MaterialIcons on Android and web.
+// Fallback for Android and web: use MaterialCommunityIcons which has broader
+// coverage of common icon names (tags, wallets, cloud-upload, etc.).
 
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
-import { ComponentProps } from 'react';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { SymbolWeight } from 'expo-symbols';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
-
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
-type IconSymbolName = keyof typeof MAPPING;
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
- * - see Material Icons in the [Icons Directory](https://icons.expo.fyi).
- * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
+ * If a mapping isn't provided we fall back to the provided name which works
+ * for many Material icon names already used across the app (e.g. 'card-outline').
  */
-const MAPPING = {
+const MAPPING: Record<string, string> = {
   'house.fill': 'home',
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
+  // common app icon name mappings -> MaterialCommunityIcons
   'chevron.right': 'chevron-right',
-} as IconMapping;
+  'chevron.down': 'chevron-down',
+  'card-outline': 'credit-card-outline',
+  'cloud-upload': 'cloud-upload',
+  'wallet': 'wallet-outline',
+  'tag': 'tag-outline',
+  'xmark': 'close',
+  'checkmark': 'check',
+  'tray': 'tray',
+  "view-grid-plus-outline":"view-grid-plus-outline",
+  "google-circles-communities":"google-circles-communities"
+};
 
-/**
- * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
- * This ensures a consistent look across platforms, and optimal resource usage.
- * Icon `name`s are based on SF Symbols and require manual mapping to Material Icons.
- */
 export function IconSymbol({
   name,
   size = 24,
   color,
   style,
 }: {
-  name: IconSymbolName;
+  name: string;
   size?: number;
   color: string | OpaqueColorValue;
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
 }) {
-  return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
+  const mapped = MAPPING[name] ?? (name as string);
+  // MaterialCommunityIcons has a wide name set; cast to any to avoid strict typing
+  return <MaterialCommunityIcons color={color as any} size={size} name={mapped as any} style={style as any} />;
 }

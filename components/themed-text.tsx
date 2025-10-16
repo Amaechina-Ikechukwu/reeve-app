@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
   link: {
     lineHeight: 30,
     fontSize: 16,
+    // fallback color; actual tint comes from theme via useThemeColor when used
     color: '#0a7ea4',
   },
 });

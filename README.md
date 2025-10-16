@@ -1,50 +1,194 @@
-# Welcome to your Expo app 👋
+# Reeve - Your Digital Financial Companion
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Reeve is a comprehensive mobile application built with React Native and Expo that provides seamless access to essential financial and utility services. From daily essentials like airtime and data purchases to advanced features like crypto P2P trading and gift cards, Reeve makes managing your digital life effortless.
 
-## Get started
+## Features
 
-1. Install dependencies
+### Core Services
+- Airtime & Data: Instant mobile top-ups and data bundle purchases
+- Cable TV: Pay for DSTV, GOTV, and other cable subscriptions
+- Electricity: Bill payments for various electricity providers
+- Gift Cards: Purchase and redeem digital gift cards
+- Virtual Numbers: Get temporary phone numbers for privacy
+- Social Growth: Social media management tools
+- Cards: Virtual and physical card management
+- Crypto P2P: Peer-to-peer cryptocurrency trading
 
+### Security & Verification
+- Firebase Authentication: Secure user authentication
+- BVN Verification: Bank Verification Number integration for identity verification
+- Transaction PIN: Secure transaction authorization
+- Digital Wallet: Integrated wallet functionality
+
+### User Experience
+- Dark/Light Mode: Automatic theme switching
+- Cross-Platform: Native Android, iOS, and Web support
+- Modern UI: Beautiful gradients and haptic feedback
+- Charts & Analytics: Data visualization with react-native-chart-kit
+- Push Notifications: Real-time updates and alerts
+
+## Tech Stack
+
+- Framework: React Native with Expo
+- Navigation: Expo Router (file-based routing)
+- Backend: Firebase (Auth, Database, Storage)
+- State Management: Zustand
+- UI Components: Custom themed components
+- Charts: Victory Native & react-native-chart-kit
+- Icons: Expo Vector Icons
+- Styling: Linear gradients and custom themes
+
+## Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+- Expo CLI
+- Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
+
+## Getting Started
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd reeve-app
+   ```
+
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. Start the app
-
-   ```bash
-   npx expo start
+3. **Environment Setup**
+   Create a `.env` file in the root directory with your Firebase configuration:
+   ```env
+   EXPO_PUBLIC_FIREBASE_API_KEY=your_api_key
+   EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+   EXPO_PUBLIC_FIREBASE_DATABASE_URL=your_database_url
+   EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+   EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+   EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+   EXPO_PUBLIC_FIREBASE_APP_ID=your_app_id
+   EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
+   EXPO_PUBLIC_API_URL=your_backend_api_url
    ```
 
-In the output, you'll find options to open the app in a
+4. **Start the development server**
+   ```bash
+   npm start
+   ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+5. **Run on specific platforms**
+   ```bash
+   # Android
+   npm run android
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+   # iOS
+   npm run ios
 
-## Get a fresh project
+   # Web
+   npm run web
+   ```
 
-When you're ready, run:
+## Usage
 
-```bash
-npm run reset-project
+### First Time Setup
+1. Launch the app and complete the onboarding process
+2. Create an account or sign in with existing credentials
+3. Complete BVN verification for full access
+4. Set up your transaction PIN
+5. Fund your wallet to start using services
+
+### Available Services
+- Navigate through the tab bar to access different services
+- Use the home screen cards to quickly access popular features
+- Check your transaction history and wallet balance
+- Manage your profile and security settings
+
+## Project Structure
+
+```
+reeve-app/
+├── app/                    # Main application screens (file-based routing)
+│   ├── (tabs)/            # Tab navigation screens
+│   │   ├── index.tsx      # Home screen with service cards
+│   │   ├── explore.tsx    # Explore/features screen
+│   │   └── _layout.tsx    # Tab navigation layout
+│   ├── auth/              # Authentication screens
+│   ├── onboarding/        # Onboarding flow
+│   └── modal.tsx          # Modal screens
+├── components/            # Reusable UI components
+│   ├── ui/               # Core UI components (buttons, inputs, etc.)
+│   └── ...               # Themed components
+├── constants/            # App constants and themes
+├── contexts/             # React contexts (Toast, etc.)
+├── hooks/                # Custom React hooks
+├── assets/               # Images, icons, and media files
+├── scripts/              # Utility scripts
+└── firebase.ts           # Firebase configuration
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Development
 
-## Learn more
+### Code Quality
+- Linting: ESLint with Expo configuration
+- TypeScript: Full type safety
+- Code Style: Consistent formatting and naming conventions
 
-To learn more about developing your project with Expo, look at the following resources:
+### Available Scripts
+```bash
+npm start          # Start Expo development server
+npm run android    # Run on Android emulator/device
+npm run ios        # Run on iOS simulator/device
+npm run web        # Run on web browser
+npm run lint       # Run ESLint
+npm run reset-project  # Reset to clean Expo template
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Key Dependencies
+- `@expo/vector-icons`: Icon library
+- `expo-router`: File-based routing
+- `firebase`: Backend services
+- `zustand`: State management
+- `react-native-chart-kit`: Data visualization
+- `expo-camera`: Camera functionality
+- `expo-secure-store`: Secure data storage
 
-## Join the community
+## Security Features
 
-Join our community of developers creating universal apps.
+- Biometric Authentication: Device-level security
+- Secure Storage: Encrypted local data storage
+- Token-based Auth: JWT authentication with Firebase
+- PIN Protection: Transaction authorization
+- BVN Integration: Identity verification
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is private and proprietary.
+
+## Support
+
+For support and questions:
+- Check the [Expo Documentation](https://docs.expo.dev/)
+- Review Firebase documentation for backend issues
+- Create an issue in the repository
+
+## Roadmap
+
+- [ ] Multi-currency wallet support
+- [ ] Advanced crypto trading features
+- [ ] Bill payment reminders
+- [ ] Social features integration
+- [ ] Enhanced security with hardware keys
+
+---
+
+Built with using React Native and Expo
