@@ -1,4 +1,3 @@
-import { getAuth } from 'firebase/auth';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -9,6 +8,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, accent } from '@/constants/theme';
 import { useToast } from '@/contexts/ToastContext';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { api } from '@/lib/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type NotificationItem = {
@@ -28,15 +28,8 @@ export default function NotificationsScreen() {
   const [readingIds, setReadingIds] = useState<Set<string>>(new Set());
   const { showToast } = useToast();
 
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
   const tint = useThemeColor({}, 'tint');
 
-  const getToken = async () => {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) throw new Error('User not authenticated');
-    return user.getIdToken(true);
-  };
 
   const parseResponseList = (json: any): NotificationItem[] => {
     // handle several possible shapes
@@ -54,25 +47,10 @@ export default function NotificationsScreen() {
   const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
-      const token = await getToken();
-      const res = await fetch(`${API_BASE_URL}/notifications`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      });
-
-      const text = await res.text();
-      let json: any = {};
-      try {
-        json = JSON.parse(text);
-      } catch {
-        json = { data: text };
-      }
-
-      if (!res.ok) {
-        showToast(json?.message || `HTTP ${res.status}`, 'error');
-        return;
-      }
-
+      const json = await api.get<any>('/notifications', { ttlMs: 10_000 });
+      // Debug: log raw API response to help diagnose parsing issues
+      // Remove or guard this in production if sensitive data may be present
+      console.log('[notifications] raw response:', JSON.stringify(json));
       const items = parseResponseList(json);
       // Sort newest first
       const sorted = [...items].sort((a, b) => {
@@ -80,60 +58,30 @@ export default function NotificationsScreen() {
         const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
         return tb - ta;
       });
+    
       setNotifications(sorted);
       // derive unread count locally
       setUnreadCount(sorted.filter((n) => !n.isRead).length);
     } catch (err) {
+      console.error('Failed to fetch notifications', err);
       showToast(err instanceof Error ? err.message : 'Failed to load notifications', 'error');
     } finally {
       setLoading(false);
     }
-  }, [API_BASE_URL, showToast]);
+  }, [showToast]);
 
-  const fetchUnreadCount = useCallback(async () => {
-    try {
-      const token = await getToken();
-      const res = await fetch(`${API_BASE_URL}/notifications/unread-count`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      });
-      const text = await res.text();
-      let json: any = {};
-      try {
-        json = JSON.parse(text);
-      } catch {
-        json = { data: text };
-      }
-      if (!res.ok) {
-        // Not fatal; silently ignore, but you could showToast here if desired
-        return;
-      }
-      const cnt = json?.data?.count ?? json?.count ?? 0;
-      if (typeof cnt === 'number') setUnreadCount(cnt);
-    } catch {}
-  }, [API_BASE_URL]);
+  // We derive unread count from the notifications list to avoid extra API calls
 
   const markAsRead = async (id: string) => {
     try {
       setReadingIds((prev) => new Set(prev).add(id));
-      const token = await getToken();
-      const res = await fetch(`${API_BASE_URL}/notifications/${encodeURIComponent(id)}/read`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `HTTP ${res.status}`);
-      }
-
+      await api.put(`/notifications/${encodeURIComponent(id)}/read`, {});
       // optimistic update
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
       setUnreadCount((c) => Math.max(0, c - 1));
-      const json = await res.json().catch(() => ({}));
-      showToast(json?.message || 'Notification marked as read', 'success');
+      showToast('Notification marked as read', 'success');
     } catch (err) {
+      console.error(`Failed to mark notification ${id} as read`, err);
       showToast(err instanceof Error ? err.message : 'Failed to mark notification read', 'error');
     } finally {
       setReadingIds((prev) => {
@@ -147,23 +95,12 @@ export default function NotificationsScreen() {
   const markAllRead = async () => {
     setRefreshing(true);
     try {
-      const token = await getToken();
-      const res = await fetch(`${API_BASE_URL}/notifications/read-all`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `HTTP ${res.status}`);
-      }
-
+      await api.put('/notifications/read-all', {});
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
-      const json = await res.json().catch(() => ({}));
-      showToast(json?.message || 'All notifications marked as read', 'success');
+      showToast('All notifications marked as read', 'success');
     } catch (err) {
+      console.error('Failed to mark all notifications read', err);
       showToast(err instanceof Error ? err.message : 'Failed to mark all notifications read', 'error');
     } finally {
       setRefreshing(false);
@@ -172,16 +109,16 @@ export default function NotificationsScreen() {
 
   useEffect(() => {
     fetchNotifications();
-    fetchUnreadCount();
-  }, [fetchNotifications, fetchUnreadCount]);
+  }, [fetchNotifications]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.allSettled([fetchNotifications(), fetchUnreadCount()]);
+    await Promise.allSettled([fetchNotifications()]);
     setRefreshing(false);
-  }, [fetchNotifications, fetchUnreadCount]);
+  }, [fetchNotifications]);
 
   const renderItem = ({ item }: { item: NotificationItem }) => {
+   
     return (
       <View style={[styles.item, item.isRead ? styles.itemRead : null]}>
         <View style={styles.leading}>
@@ -205,8 +142,8 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <SafeAreaView>
-        <ThemedView style={styles.container}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <ThemedView style={styles.container}>
       <View style={styles.headerRow}>
         <ThemedText type="title">Notifications</ThemedText>
         <View style={styles.headerActions}>
@@ -228,9 +165,10 @@ export default function NotificationsScreen() {
       ) : (
         <FlatList
           data={notifications}
-          keyExtractor={(i) => i.id}
+          keyExtractor={(i, idx) => (i?.id ? String(i.id) : String(idx))}
           renderItem={renderItem}
-          contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 120, flexGrow: 1 }}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           refreshing={refreshing}
           onRefresh={onRefresh}

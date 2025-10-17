@@ -9,11 +9,14 @@ const SF_WHITELIST = new Set([
   'house.fill',
   'paperplane.fill',
   'chevron.left',
+  'phone.fill',
   'chevron.right',
   'chevron.down',
   'xmark',
   'checkmark',
+  'checkmark.circle.fill',
   'tray',
+  'person.crop.circle',
 ]);
 
 // Optional mappings from our app names to SF names when the app wants an SF
@@ -24,9 +27,12 @@ const SF_MAPPING: Record<string, string> = {
   'chevron.down': 'chevron.down',
   'xmark': 'xmark',
   'checkmark': 'checkmark',
+  'checkmark.circle.fill': 'checkmark.circle.fill',
   'house.fill': 'house.fill',
   'paperplane.fill': 'paperplane.fill',
+  'phone.fill': 'phone.fill',
   'tray': 'tray',
+  'person.crop.circle': 'person.crop.circle',
   "view-grid-plus-outline":"view-grid-plus-outline",
   "google-circles-communities":"google-circles-communities"
 };
@@ -35,6 +41,7 @@ const SF_MAPPING: Record<string, string> = {
 // icon names used across the app.
 const MCI_MAPPING: Record<string, string> = {
   'chevron.left.forwardslash.chevron.right': 'code',
+  'phone.fill': 'phone',
   'chevron.right': 'chevron-right',
   'chevron.down': 'chevron-down',
   'card-outline': 'credit-card-outline',
@@ -43,9 +50,15 @@ const MCI_MAPPING: Record<string, string> = {
   'tag': 'tag-outline',
   'xmark': 'close',
   'checkmark': 'check',
+  'checkmark.circle.fill': 'check-circle',
   'tray': 'tray',
   'house.fill': 'home',
   'paperplane.fill': 'send',
+  // VTU specific (contacts + networks) fallbacks to MCI
+  'person.crop.circle': 'account-circle-outline',
+  'antenna.radiowaves.left.and.right': 'radio-tower',
+  'dot.radiowaves.left.and.right': 'access-point',
+  'waveform': 'sine-wave',
   "view-grid-plus-outline":"view-grid-plus-outline",
   "google-circles-communities":"google-circles-communities"
 };

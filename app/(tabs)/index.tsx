@@ -1,20 +1,22 @@
+import BankAccountCard from '@/components/BankAccountCard';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import RecentTransactions from '@/components/transactions/RecentTransactions';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import SectionCard from '@/components/ui/SectionCard';
 import { UserStatusChecker } from '@/components/user-status-checker';
 import { Colors } from '@/constants/theme';
 import { useToast } from '@/contexts/ToastContext';
 import { useUserDetails } from '@/hooks/useUserDetails';
+import { api } from '@/lib/api';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BlurView } from 'expo-blur';
-import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { getAuth } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableNativeFeedback, TouchableOpacity, View } from 'react-native';
 
@@ -107,10 +109,13 @@ interface OverviewApiResponse {
 interface AccountDetailsResponse {
   success: boolean;
   data: {
-    account_number: string;
+    data:{
+      account_number: string;
     account_status: string;
     amount: number;
     bank_name: string;
+    }
+    
   };
 }
 
@@ -122,7 +127,8 @@ export default function HomeScreen() {
     const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
     const [overviewLoading, setOverviewLoading] = useState(true);
     const [overviewError, setOverviewError] = useState<string | null>(null);
-  const [accountData, setAccountData] = useState<AccountDetailsResponse['data'] | null>(null);
+  type AccountData = AccountDetailsResponse['data']['data'];
+  const [accountData, setAccountData] = useState<AccountData | null>(null);
   const [accountLoading, setAccountLoading] = useState<boolean>(true);
   const [accountError, setAccountError] = useState<string | null>(null);
 
@@ -247,31 +253,7 @@ export default function HomeScreen() {
     useEffect(() => {
       const fetchOverview = async () => {
         try {
-          const auth = getAuth();
-          const user = auth.currentUser;
-          if (!user) {
-            setOverviewError('User not authenticated');
-            setOverviewLoading(false);
-            return;
-          }
-
-          const idToken = await user.getIdToken(true);
-
-          const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
-          const response = await fetch(`${API_BASE_URL}/overview`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${idToken}`,
-              'Content-Type': 'application/json',
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data: OverviewApiResponse = await response.json();
-
+          const data = await api.get<OverviewApiResponse>('/overview', { ttlMs: 15_000, key: 'overview' });
           if (data.success) {
             setOverviewData(data.data);
           } else {
@@ -290,33 +272,10 @@ export default function HomeScreen() {
     useEffect(() => {
       const fetchAccountDetails = async () => {
         try {
-          const auth = getAuth();
-          const user = auth.currentUser;
-          if (!user) {
-            setAccountError('User not authenticated');
-            setAccountLoading(false);
-            return;
-          }
-
-          const idToken = await user.getIdToken(true);
-          const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
-          const response = await fetch(`${API_BASE_URL}/accounts/details`, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-              'Content-Type': 'application/json',
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const json: AccountDetailsResponse = await response.json();
-      
+          const json = await api.get<AccountDetailsResponse>('/accounts/details', { ttlMs: 15_000, key: 'acct-details' });
           if (json.success) {
-                setAccountData(json.data);
-              } else {
+            setAccountData(json.data.data);
+          } else {
             setAccountError('Failed to fetch account details');
           }
         } catch (err) {
@@ -457,98 +416,31 @@ export default function HomeScreen() {
           </View>
           {/* </BlurView> */}
           {/* Glass bank account card */}
-          <View style={{ paddingHorizontal: 16, paddingBottom: 16, marginTop: 90 }}>
-            <BlurView intensity={70} style={{
-              borderRadius: 16,
-              overflow: 'hidden',
-              paddingHorizontal: 16,
-              paddingVertical: 22,
-              minHeight: 150,
-              justifyContent: 'space-between',
-              backgroundColor: 'rgba(255,255,255,0.08)',
-              borderWidth: StyleSheet.hairlineWidth,
-              borderColor: 'rgba(255,255,255,0.18)'
-            }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <Ionicons name="wallet-outline" size={18} color="#EAF4F6" />
-                <Text style={{ color: '#EAF4F6', fontWeight: '600', fontSize: 14, flex: 1 }}>Wallet Account</Text>
-                {!!accountData?.account_status && (
-                  <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: accountData.account_status === 'ACTIVE' ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)' }}>
-                    <Text style={{ fontSize: 11, fontWeight: '600', color: accountData.account_status === 'ACTIVE' ? '#86efac' : '#fca5a5' }}>{accountData.account_status}</Text>
-                  </View>
-                )}
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <View style={{flex:1}}>
-                  <Text style={{ color: '#EAF4F6', fontSize: 16, fontWeight: '700' }}>
-                    {accountData?.bank_name ?? (accountLoading ? 'Loading…' : accountError ? 'Unavailable' : 'Bank')}
-                  </Text>
-                  <Text style={{ color: '#D1E6EA', fontSize: 13, opacity: 0.9, marginTop: 4 }}>
-                    {accountData?.account_number ? formatAccountNumber(accountData.account_number) : '•••• ••• •••'}
-                  </Text>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#7df2c2', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 }}>
-                  <Ionicons name="cash-outline" size={14} color="#0b3b2e" />
-                  <Text style={{ color: '#0b3b2e', fontWeight: '700', fontSize: 13 }}>{formatCurrency(accountData?.amount)}</Text>
-                </View>
-              </View>
-              {/* Copy actions */}
-              <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
-                <TouchableOpacity
-                  activeOpacity={0.75}
-                  onPress={async () => {
-                    if (!accountData) return;
-                    const payload = `Bank: ${accountData.bank_name}\nAccount: ${accountData.account_number}\nName: ${userDetails?.fullname}`;
-                    await Clipboard.setStringAsync(payload);
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                    showToast('Account details copied', 'success');
-                  }}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 6,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    borderRadius: 10,
-                    backgroundColor: 'rgba(255,255,255,0.12)',
-                    borderWidth: StyleSheet.hairlineWidth,
-                    borderColor: 'rgba(255,255,255,0.2)'
-                  }}
-                >
-                  <Ionicons name="copy-outline" size={14} color="#EAF4F6" />
-                  <Text style={{ color: '#EAF4F6', fontSize: 12, fontWeight: '600' }}>Copy details</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  activeOpacity={0.75}
-                  onPress={async () => {
-                    if (!accountData?.account_number) return;
-                    await Clipboard.setStringAsync(accountData.account_number);
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                    showToast('Account number copied', 'success');
-                  }}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 6,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    borderRadius: 10,
-                    backgroundColor: 'rgba(255,255,255,0.12)',
-                    borderWidth: StyleSheet.hairlineWidth,
-                    borderColor: 'rgba(255,255,255,0.2)'
-                  }}
-                >
-                  <Ionicons name="copy" size={14} color="#EAF4F6" />
-                  <Text style={{ color: '#EAF4F6', fontSize: 12, fontWeight: '600' }}>Copy number</Text>
-                </TouchableOpacity>
-              </View>
-            </BlurView>
-          </View>
+          {/* Replaced inline markup with exported BankAccountCard component */}
+          <BankAccountCard
+            accountData={accountData}
+            accountLoading={accountLoading}
+            accountError={accountError}
+            userFullname={userDetails?.fullname}
+            showToast={showToast}
+          />
 
         </View>
       }>
       <UserStatusChecker />
+
+      {/* Recent transactions preview */}
+      <View style={{ paddingTop: 8 }}>
+        <SectionCard>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <Text style={{ fontSize: 16, fontWeight: '700', color: Colors.light.text }}>Recent Transactions</Text>
+            <TouchableOpacity onPress={() => router.push('/transactions' as any)}>
+              <Text style={{ color: Colors.light.tint, fontWeight: '600' }}>View all</Text>
+            </TouchableOpacity>
+          </View>
+          <RecentTransactions limit={2} />
+        </SectionCard>
+      </View>
 
   <MasonryGrid data={homeServices} columnCount={2} />
       {__DEV__&& <ThemedView style={{flexDirection:"column"}}>
@@ -744,4 +636,5 @@ const styles = StyleSheet.create({
     opacity: 0.6,
     marginTop: 4,
   },
+  
 });

@@ -13,6 +13,7 @@ import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 const MAPPING: Record<string, string> = {
   'house.fill': 'home',
   'paperplane.fill': 'send',
+  'phone.fill': 'phone',
   'chevron.left.forwardslash.chevron.right': 'code',
   // common app icon name mappings -> MaterialCommunityIcons
   'chevron.right': 'chevron-right',
@@ -23,7 +24,13 @@ const MAPPING: Record<string, string> = {
   'tag': 'tag-outline',
   'xmark': 'close',
   'checkmark': 'check',
+  'checkmark.circle.fill': 'check-circle',
   'tray': 'tray',
+  // VTU specific (contacts + networks)
+  'person.crop.circle': 'account-circle-outline',
+  'antenna.radiowaves.left.and.right': 'radio-tower',
+  'dot.radiowaves.left.and.right': 'access-point',
+  'waveform': 'sine-wave',
   "view-grid-plus-outline":"view-grid-plus-outline",
   "google-circles-communities":"google-circles-communities"
 };

@@ -1,11 +1,13 @@
+import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
+import { Colors } from '@/constants/theme';
 import { useToast } from '@/contexts/ToastContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -24,8 +26,26 @@ export default function VirtualNumbersIndex() {
 	const [purchases, setPurchases] = useState<PurchaseItem[]>([]);
 	const [loading, setLoading] = useState(true);
 	const colorScheme = useColorScheme();
+	const navigation = useNavigation();
 	const { showToast } = useToast();
 	const router = useRouter();
+
+	useLayoutEffect(() => {
+		navigation.setOptions({
+			headerShown: true,
+			headerTitle: 'Virtual Numbers',
+			headerTitleAlign: 'center',
+			headerStyle: {
+				backgroundColor: Colors[colorScheme ?? 'light'].background,
+				elevation: 0,
+				shadowOpacity: 0,
+				borderBottomWidth: 1,
+				borderBottomColor: Colors[colorScheme ?? 'light'].icon + '20',
+			},
+			headerTintColor: Colors[colorScheme ?? 'light'].text,
+			// Do not override headerLeft so default back button shows.
+		});
+	}, [navigation, colorScheme]);
 
 	useEffect(() => {
 		let mounted = true;
