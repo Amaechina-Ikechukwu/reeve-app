@@ -51,6 +51,14 @@ export default function RootLayout() {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      user.getIdToken().then((idToken) => {
+        // console.log( idToken);
+      });
+    }
+  }, [user]);
+
   // If we've finished checking auth and there's no user, ensure we land on the login screen.
   useEffect(() => {
     if (authChecked && !user) {
@@ -70,13 +78,21 @@ export default function RootLayout() {
         ) : (
           <Stack screenOptions={{ headerShown: false }}>
             {!user ? (
-              <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+              <>
+                <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+                <Stack.Screen name="auth/signin" options={{ headerShown: false }} />
+              </>
             ) : shouldShowOnboarding ? (
               <Stack.Screen name="onboarding/1" options={{ headerShown: false }} />
             ) : (
-              <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Home' }} />
+              <>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Home' }} />
+                <Stack.Screen name="auth/verify-email" options={{ headerShown: false }} />
+                <Stack.Screen name="bvn/index" options={{ headerShown: false }} />
+                <Stack.Screen name="bvn/verify-phone" options={{ headerShown: false }} />
+                <Stack.Screen name="bvn/verify-otp" options={{ headerShown: false }} />
+              </>
             )}
-            <Stack.Screen name="auth/signin" options={{ headerShown: false }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal', headerShown: false }} />
           </Stack>
         )}

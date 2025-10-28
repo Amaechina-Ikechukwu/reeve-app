@@ -25,8 +25,16 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // On success, navigate to main app
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Check if email is verified
+      if (!userCredential.user.emailVerified) {
+        showToast('Please verify your email first', 'info');
+        router.replace('/auth/verify-email');
+        return;
+      }
+      
+      // On success, navigate to main app (UserStatusChecker will handle BVN check)
       router.replace('/(tabs)');
     } catch (error: any) {
       showToast(error.message, 'error');

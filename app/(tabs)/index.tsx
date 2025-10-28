@@ -433,7 +433,7 @@ export default function HomeScreen() {
       <View style={{ paddingTop: 8 }}>
         <SectionCard>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <Text style={{ fontSize: 16, fontWeight: '700', color: Colors.light.text }}>Recent Transactions</Text>
+            <ThemedText type='title' style={{ fontSize: 16, fontWeight: '700', }}>Recent Transactions</ThemedText>
             <TouchableOpacity onPress={() => router.push('/transactions' as any)}>
               <Text style={{ color: Colors.light.tint, fontWeight: '600' }}>View all</Text>
             </TouchableOpacity>
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   serviceLabel: {
-    color: Colors.light.text,
+    color: Colors.dark.text,
     fontWeight: '600',
     fontSize: 14,
     marginTop: 16,

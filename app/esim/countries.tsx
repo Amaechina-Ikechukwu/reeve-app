@@ -100,10 +100,10 @@ export default function EsimCountries() {
 
 	const renderCountryItem = ({ item }: { item: Country }) => (
 		<TouchableOpacity
-			style={styles.countryItem}
+			style={[styles.countryItem,{backgroundColor:Colors[colorScheme??"light"].background}]}
 			onPress={() => router.push(`/esim/operators/${item.slug}` as any)}
 		>
-			<View style={styles.countryRow}>
+			<View style={[styles.countryRow, ]}>
 				{item.image?.url ? (
 					<Image source={{ uri: item.image.url }} style={styles.flagImage} />
 				) : (

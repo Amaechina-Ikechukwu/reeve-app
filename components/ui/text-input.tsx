@@ -23,10 +23,14 @@ export function ThemedTextInput(props: ThemedTextInputProps) {
 
 const styles = StyleSheet.create({
   input: {
-    height: 50,
+
     paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
+  
     fontSize: 16,
+       borderWidth:1,
+            borderColor:accent,
+            height:50,
+            padding:5,
+            borderRadius:10
   },
 });

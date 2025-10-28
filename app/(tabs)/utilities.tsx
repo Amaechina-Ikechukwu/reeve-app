@@ -1,5 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Fonts } from '@/constants/theme';
+import { Fonts } from '@/constants/theme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -25,6 +25,17 @@ export default function UtilitiesScreen() {
 
   // Full services list copied to keep visuals consistent
   const services: ServiceItem[] = [
+    {
+      key: 'crypto',
+      name: 'Crypto',
+      page: '/crypto',
+      icon: 'logo-bitcoin',
+      height: 140,
+      borderColors: ['rgba(247, 147, 26, 0.5)', 'rgba(247, 147, 26, 0.08)', 'rgba(247, 147, 26, 0.04)'] as const,
+      cardColors: ['rgba(247, 147, 26, 0.22)', 'rgba(242, 169, 0, 0.10)'] as const,
+      iconColors: ['#f7931a', '#f2a900'] as const,
+      iconTint: '#ffffff',
+    },
     {
       key: 'vtu',
       name: 'VTU (Airtime/Data)',
@@ -231,7 +242,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   serviceLabel: {
-    color: Colors.light.text,
+    // color: Colors.light.text,
     fontWeight: '600',
     fontSize: 14,
     marginTop: 16,

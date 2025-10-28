@@ -10,12 +10,12 @@ export function Avatar({ name, size = 40 }: AvatarProps) {
   const backgroundColor = useThemeColor({}, 'tint');
   const textColor = useThemeColor({}, 'background');
 
-  const initials = name
+  const initials = name ?name
     .split(' ')
     .map(n => n[0])
     .join('')
     .toUpperCase()
-    .slice(0, 2);
+    .slice(0, 2):"R";
 
   return (
     <View style={[styles.container, { width: size, height: size, backgroundColor }]}>

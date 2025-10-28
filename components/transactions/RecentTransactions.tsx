@@ -3,9 +3,10 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { api } from '../../lib/api';
 import type { Transaction, TransactionsResponse } from '../../types/transactions';
+import { ThemedText } from '../themed-text';
 
 type Props = {
   limit?: number; // default 4
@@ -86,7 +87,7 @@ export const RecentTransactions: React.FC<Props> = ({ limit = 4, onError }) => {
   if (error) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
+        <ThemedText style={styles.errorText}>{error}</ThemedText>
       </View>
     );
   }
@@ -94,7 +95,7 @@ export const RecentTransactions: React.FC<Props> = ({ limit = 4, onError }) => {
   if (!items.length) {
     return (
       <View style={styles.center}>
-        <Text>No recent transactions</Text>
+        <ThemedText>No recent transactions</ThemedText>
       </View>
     );
   }
@@ -123,18 +124,18 @@ export const RecentTransactions: React.FC<Props> = ({ limit = 4, onError }) => {
             ]}
           >
             <View style={styles.cardLeft}>
-              <Text style={[styles.title, { color: isDark ? Colors.dark.text : Colors.light.text }]}>
+              <ThemedText style={[styles.title, { color: isDark ? Colors.dark.text : Colors.light.text }]}>
                 {item.description || item.type}
-              </Text>
-              <Text style={[styles.sub, { color: isDark ? 'rgba(255,255,255,0.6)' : '#888' }]}>
+              </ThemedText>
+              <ThemedText style={[styles.sub, { color: isDark ? 'rgba(255,255,255,0.6)' : '#888' }]}>
                 {new Date(item.createdAt).toLocaleString()}
-              </Text>
+              </ThemedText>
             </View>
             <View style={styles.cardRight}>
-              <Text style={[styles.amount, item.flow === 'credit' ? styles.credit : styles.debit]}>
+              <ThemedText style={[styles.amount, item.flow === 'credit' ? styles.credit : styles.debit]}>
                 {item.flow === 'credit' ? '+' : '-'}{formatAmount(item.amount)}
-              </Text>
-              <Text style={[styles.status, { color: isDark ? 'rgba(255,255,255,0.7)' : '#666' }]}>{item.status}</Text>
+              </ThemedText>
+              <ThemedText style={[styles.status, { color: isDark ? 'rgba(255,255,255,0.7)' : '#666' }]}>{item.status}</ThemedText>
             </View>
           </View>
         </TouchableOpacity>

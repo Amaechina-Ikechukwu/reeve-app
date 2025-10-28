@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 
@@ -31,9 +31,15 @@ export default function SignInScreen() {
 
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      // On success, navigate to main app
-      router.replace('/(tabs)');
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Send email verification
+      await sendEmailVerification(userCredential.user);
+      
+      showToast('Account created! Please verify your email.', 'success');
+      
+      // Navigate to email verification screen
+      router.replace('/auth/verify-email');
     } catch (error: any) {
       showToast(error.message, 'error');
     } finally {

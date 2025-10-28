@@ -7,12 +7,10 @@ import { ThemedText } from '../themed-text';
 import { ThemedView } from '../themed-view';
 import { IconSymbol } from './icon-symbol';
 
-export type OptionItem = string | { label: string; value: string; imageUrl?: string };
-
 export interface OptionsModalProps {
   visible: boolean;
   onClose: () => void;
-  options: OptionItem[];
+  options: string[];
   onSelect: (value: string) => void;
   title?: string;
 }
@@ -20,30 +18,26 @@ export interface OptionsModalProps {
 export function OptionsModal({ visible, onClose, options, onSelect, title }: OptionsModalProps) {
   const colorScheme = useColorScheme();
 
-  const renderItem = ({ item }: { item: OptionItem }) => {
-    const label = typeof item === 'string' ? item : item.label;
-    const value = typeof item === 'string' ? item : item.value;
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          onSelect(value);
-          onClose();
-        }}
-        style={[
-          styles.optionItem,
-          { backgroundColor: Colors[colorScheme ?? 'light'].background, borderColor: Colors[colorScheme ?? 'light'].icon + '30' },
-        ]}
-      >
-        <ThemedText>{label}</ThemedText>
-        <IconSymbol
-          size={18}
-          name="chevron.right"
-          color={Colors[colorScheme ?? 'light'].text}
-          style={{ opacity: 0.6 }}
-        />
-      </TouchableOpacity>
-    );
-  };
+  const renderItem = ({ item }: { item: string }) => (
+    <TouchableOpacity
+      onPress={() => {
+        onSelect(item);
+        onClose();
+      }}
+      style={[
+        styles.optionItem,
+        { backgroundColor: Colors[colorScheme ?? 'light'].background, borderColor: Colors[colorScheme ?? 'light'].icon + '30' },
+      ]}
+    >
+      <ThemedText>{item}</ThemedText>
+      <IconSymbol
+        size={18}
+        name="chevron.right"
+        color={Colors[colorScheme ?? 'light'].text}
+        style={{ opacity: 0.6 }}
+      />
+    </TouchableOpacity>
+  );
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>

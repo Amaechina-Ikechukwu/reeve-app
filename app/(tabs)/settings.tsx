@@ -92,10 +92,10 @@ export default function SettingsScreen() {
 				<ExternalLink href="https://www.whatsapp.com/legal/privacy-policy" asChild>
 					<Row title="WhatsApp Privacy Policy" icon="shield" />
 				</ExternalLink>
-				<ExternalLink href="https://reeve.app/terms" asChild>
+				<ExternalLink href="https://reeve.digital/a=terms" asChild>
 					<Row title="Terms of Service" icon="file-document-outline" />
 				</ExternalLink>
-				<ExternalLink href="https://reeve.app/privacy" asChild>
+				<ExternalLink href="https://reeve.digital/a=privacypolicy" asChild>
 					<Row title="Privacy Policy" icon="lock-outline" />
 				</ExternalLink>
 			</Section>
