@@ -4,9 +4,10 @@ import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import 'react-native-reanimated';
 
+import SplashScreen from '@/components/SplashScreen';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { auth } from '@/firebase';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -21,6 +22,8 @@ export default function RootLayout() {
   const [shouldShowOnboarding, setShouldShowOnboarding] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  // keep the splash visible a short time after checks complete
+  const [showSplash, setShowSplash] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -67,14 +70,27 @@ export default function RootLayout() {
     }
   }, [authChecked, user, router]);
 
+  // When both onboarding and auth checks are finished, keep the splash
+  // visible for a short delay so it doesn't disappear instantly.
+  useEffect(() => {
+    const SPLASH_DELAY_MS = 1500; // adjust to taste
+    let t: ReturnType<typeof setTimeout> | null = null;
+
+    if (checkedOnboarding && authChecked) {
+      t = setTimeout(() => setShowSplash(false), SPLASH_DELAY_MS);
+    }
+
+    return () => {
+      if (t) clearTimeout(t);
+    };
+  }, [checkedOnboarding, authChecked]);
+
   return (
     <ToastProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        {/* show a loader while we check AsyncStorage and auth */}
-        {!checkedOnboarding || !authChecked ? (
-          <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" />
-          </View>
+        {/* show a loader while we check AsyncStorage and auth; keep splash a bit longer */}
+        {!checkedOnboarding || !authChecked || showSplash ? (
+          <SplashScreen />
         ) : (
           <Stack screenOptions={{ headerShown: false }}>
             {!user ? (
