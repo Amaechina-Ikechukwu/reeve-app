@@ -25,6 +25,7 @@ export default function TransactionsScreen() {
       headerShown: true,
       headerTitle: 'Transactions',
       headerTitleAlign: 'center',
+      headerBackTitle: '',
       headerStyle: {
         backgroundColor: Colors[scheme ?? 'light'].background,
         elevation: 0,

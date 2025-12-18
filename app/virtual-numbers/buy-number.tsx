@@ -196,7 +196,14 @@ export default function BuyVirtualNumber() {
 					{item.providers.map((prov, idx) => (
 						<TouchableOpacity
 							key={prov.provider}
-							style={[styles.providerRow, prov.count <= 0 && styles.disabledProvider]}
+							style={[
+								styles.providerRow,
+								{
+									borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.15)' : '#e0e0e0',
+									backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : '#f8f8f8',
+								},
+								prov.count <= 0 && styles.disabledProvider
+							]}
 							disabled={prov.count <= 0}
 							onPress={() => {
 								if (process.env.EXPO_OS === 'ios') {
@@ -280,7 +287,9 @@ export default function BuyVirtualNumber() {
 										) : null}
 									</TouchableOpacity>
 								)}
-								ItemSeparatorComponent={() => <View style={styles.sep} />}
+								ItemSeparatorComponent={() => (
+									<View style={[styles.sep, { backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }]} />
+								)}
 								contentContainerStyle={{ paddingBottom: 20 }}
 							/>
 						)}
@@ -328,7 +337,7 @@ const styles = StyleSheet.create({
 	modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
 	centerRow: { alignItems: 'center', justifyContent: 'center', paddingVertical: 20 },
 	countryRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 },
-	sep: { height: 1, opacity: 0.08, backgroundColor: '#999' },
+	sep: { height: 1 },
 	backButton: { padding: 8 },
 	providersContainer: { marginTop: 8 },
 	providerRow: {
@@ -340,8 +349,6 @@ const styles = StyleSheet.create({
 		paddingVertical: 8,
 		borderRadius: 8,
 		borderWidth: 1,
-		borderColor: '#e0e0e0',
-		backgroundColor: '#f8f8f8',
 		height:50
 	},
 	disabledProvider: { opacity: 0.5 },

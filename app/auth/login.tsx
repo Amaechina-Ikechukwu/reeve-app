@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -43,6 +43,45 @@ export default function LoginScreen() {
     }
   };
 
+  const handleForgotPassword = () => {
+    if (!email) {
+      showToast('Please enter your email address', 'error');
+      return;
+    }
+
+    Alert.alert(
+      'Reset Password',
+      `Send password reset email to ${email}?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Send',
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await sendPasswordResetEmail(auth, email);
+              showToast('Password reset email sent! Check your inbox.', 'success');
+            } catch (error: any) {
+              if (error.code === 'auth/user-not-found') {
+                showToast('No account found with this email', 'error');
+              } else if (error.code === 'auth/invalid-email') {
+                showToast('Invalid email address', 'error');
+              } else {
+                showToast('Failed to send reset email. Please try again.', 'error');
+              }
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -77,6 +116,14 @@ export default function LoginScreen() {
             loading={loading}
             style={styles.button}
           />
+
+          <ThemedText
+            type="link"
+            onPress={handleForgotPassword}
+            style={styles.forgotText}
+          >
+            Forgot Password?
+          </ThemedText>
 
           <ThemedText
             type="link"
@@ -119,6 +166,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: '#FF0707',
+  },
+  forgotText: {
+    marginTop: 12,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
   linkText: {
     marginTop: 16,

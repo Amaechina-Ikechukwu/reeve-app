@@ -41,6 +41,7 @@ export default function ElectricityUtilities() {
       headerShown: true,
       headerTitle: 'Electricity',
       headerTitleAlign: 'center',
+      headerBackTitle: '',
       headerStyle: {
         backgroundColor: Colors[colorScheme ?? 'light'].background,
         elevation: 0,

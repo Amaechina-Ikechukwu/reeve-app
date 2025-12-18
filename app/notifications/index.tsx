@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -7,8 +7,10 @@ import { ThemedActivityIndicator } from '@/components/ui/activity-indicator';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, accent } from '@/constants/theme';
 import { useToast } from '@/contexts/ToastContext';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { api } from '@/lib/api';
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type NotificationItem = {
@@ -27,8 +29,27 @@ export default function NotificationsScreen() {
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [readingIds, setReadingIds] = useState<Set<string>>(new Set());
   const { showToast } = useToast();
+  const colorScheme = useColorScheme();
+  const navigation = useNavigation();
 
   const tint = useThemeColor({}, 'tint');
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      headerTitle: 'Notifications',
+      headerTitleAlign: 'center',
+      headerBackTitle: '',
+      headerStyle: {
+        backgroundColor: Colors[colorScheme ?? 'light'].background,
+        elevation: 0,
+        shadowOpacity: 0,
+        borderBottomWidth: 1,
+        borderBottomColor: Colors[colorScheme ?? 'light'].icon + '20',
+      },
+      headerTintColor: Colors[colorScheme ?? 'light'].text,
+    });
+  }, [navigation, colorScheme]);
 
 
   const parseResponseList = (json: any): NotificationItem[] => {
@@ -145,7 +166,6 @@ export default function NotificationsScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       <ThemedView style={styles.container}>
       <View style={styles.headerRow}>
-        <ThemedText type="title">Notifications</ThemedText>
         <View style={styles.headerActions}>
           <View style={styles.badge}>
             <ThemedText style={styles.badgeText}>{unreadCount}</ThemedText>
@@ -187,7 +207,7 @@ export default function NotificationsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerRow: { padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  headerRow: { padding: 16, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' },
   headerActions: { flexDirection: 'row', alignItems: 'center' },
   item: {
     backgroundColor: Colors.light.background,

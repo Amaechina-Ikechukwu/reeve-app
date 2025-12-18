@@ -2,6 +2,7 @@ import Skeleton from '@/components/ui/skeleton';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useRouter } from 'expo-router';
+import { getAuth } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { api } from '../../lib/api';
@@ -29,13 +30,67 @@ export const RecentTransactions: React.FC<Props> = ({ limit = 4, onError }) => {
       try {
         setLoading(true);
         setError(null);
+        
+        // Check if user is logged in before making API call
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) {
+          if (mounted) {
+            setLoading(false);
+            setItems([]);
+          }
+          return;
+        }
+        
         const data = await api.get<TransactionsResponse>(`/transactions/recents?limit=${encodeURIComponent(String(limit))}`, {
           ttlMs: 15_000, // cache briefly to prevent spamming endpoint
           signal: controller.signal,
           key: `recents-${limit}`,
         });
         if (!mounted) return;
-        setItems((data?.data ?? []).slice(0, limit));
+        
+        // Add mock transactions for testing
+        const mockTransactions: Transaction[] = [
+          {
+            id: 'txn-001',
+            amount: 2500,
+            type: 'airtime',
+            status: 'completed',
+            description: 'MTN Airtime Purchase',
+            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+            flow: 'debit',
+          },
+          {
+            id: 'txn-002',
+            amount: 15000,
+            type: 'transfer',
+            status: 'completed',
+            description: 'Account Credit',
+            createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
+            flow: 'credit',
+          },
+          {
+            id: 'txn-003',
+            amount: 5000,
+            type: 'data',
+            status: 'completed',
+            description: 'Data Bundle Purchase',
+            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+            flow: 'debit',
+          },
+          {
+            id: 'txn-004',
+            amount: 8500,
+            type: 'electricity',
+            status: 'completed',
+            description: 'Electricity Token - IKEDC',
+            createdAt: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(), // 1.5 days ago
+            flow: 'debit',
+          },
+        ];
+        
+        const transactions = data?.data ?? [];
+        setItems([...mockTransactions, ...transactions].slice(0, limit));
       } catch (e: any) {
         const msg = e?.message ?? 'Failed to load recent transactions';
         setError(msg);

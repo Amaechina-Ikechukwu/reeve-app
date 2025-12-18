@@ -17,6 +17,7 @@ const SF_WHITELIST = new Set([
   'checkmark.circle.fill',
   'tray',
   'person.crop.circle',
+  'globe',
 ]);
 
 // Optional mappings from our app names to SF names when the app wants an SF
@@ -33,6 +34,7 @@ const SF_MAPPING: Record<string, string> = {
   'phone.fill': 'phone.fill',
   'tray': 'tray',
   'person.crop.circle': 'person.crop.circle',
+  'globe': 'globe',
   "view-grid-plus-outline":"view-grid-plus-outline",
   "google-circles-communities":"google-circles-communities"
 };
@@ -53,6 +55,7 @@ const MCI_MAPPING: Record<string, string> = {
   'checkmark.circle.fill': 'check-circle',
   'tray': 'tray',
   'house.fill': 'home',
+  'globe': 'web',
   'paperplane.fill': 'send',
   // VTU specific (contacts + networks) fallbacks to MCI
   'person.crop.circle': 'account-circle-outline',

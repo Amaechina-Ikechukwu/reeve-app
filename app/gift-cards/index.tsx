@@ -27,6 +27,7 @@ export default function GiftcardsIndex() {
       headerShown: true,
       headerTitle: 'Gift Cards',
       headerTitleAlign: 'center',
+      headerBackTitle: '',
       headerStyle: {
         backgroundColor: Colors[colorScheme ?? 'light'].background,
         elevation: 0,

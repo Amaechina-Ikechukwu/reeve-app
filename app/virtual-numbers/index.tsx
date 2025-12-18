@@ -35,6 +35,7 @@ export default function VirtualNumbersIndex() {
 			headerShown: true,
 			headerTitle: 'Virtual Numbers',
 			headerTitleAlign: 'center',
+			headerBackTitle: '',
 			headerStyle: {
 				backgroundColor: Colors[colorScheme ?? 'light'].background,
 				elevation: 0,

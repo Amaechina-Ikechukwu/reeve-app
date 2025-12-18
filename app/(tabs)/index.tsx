@@ -5,10 +5,12 @@ import { ThemedView } from '@/components/themed-view';
 import RecentTransactions from '@/components/transactions/RecentTransactions';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { LoginModal } from '@/components/ui/login-modal';
 import SectionCard from '@/components/ui/SectionCard';
 import { UserStatusChecker } from '@/components/user-status-checker';
 import { Colors } from '@/constants/theme';
 import { useToast } from '@/contexts/ToastContext';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useUserDetails } from '@/hooks/useUserDetails';
 import { api } from '@/lib/api';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -17,6 +19,7 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { getAuth } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableNativeFeedback, TouchableOpacity, View } from 'react-native';
 
@@ -123,6 +126,7 @@ export default function HomeScreen() {
     const { showToast } = useToast();
     const { userDetails } = useUserDetails();
     const router = useRouter();
+    const colorScheme = useColorScheme();
 
     const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
     const [overviewLoading, setOverviewLoading] = useState(true);
@@ -131,6 +135,23 @@ export default function HomeScreen() {
   const [accountData, setAccountData] = useState<AccountData | null>(null);
   const [accountLoading, setAccountLoading] = useState<boolean>(true);
   const [accountError, setAccountError] = useState<string | null>(null);
+  
+  // Login modal state
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  
+  // Check if user is authenticated and show login modal if not
+  useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
+    if (!user) {
+      // Show modal after a brief delay to let the UI render
+      const timer = setTimeout(() => {
+        setShowLoginModal(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
     type Gradient = readonly [string, string] | readonly [string, string, string];
     type ServiceItem = {
@@ -324,7 +345,7 @@ export default function HomeScreen() {
                 <Ionicons name={item.icon as any} size={22} color={item.iconTint as string} />
               </LinearGradient>
             </View>
-            <ThemedText style={styles.serviceLabel}>{item.name}</ThemedText>
+            <ThemedText style={[styles.serviceLabel, { color: Colors[colorScheme ?? 'light'].text }]}>{item.name}</ThemedText>
           </LinearGradient>
         </LinearGradient>
       </TouchableOpacity>
@@ -379,11 +400,37 @@ export default function HomeScreen() {
       return acc;
     };
 
+    const injectTestTransaction = async () => {
+      try {
+        const testTransaction = {
+          amount: Math.floor(Math.random() * 10000) + 1000,
+          type: 'airtime',
+          status: 'completed',
+          description: 'Test Successful Transaction',
+          flow: 'credit',
+        };
+        
+        await api.post('/transactions', testTransaction);
+        showToast('Test transaction injected successfully!', 'success');
+        
+        // Clear the cache to force refresh
+        // You might need to refresh the page or the RecentTransactions component
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : 'Failed to inject transaction', 'error');
+      }
+    };
+
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: 'rgba(161, 206, 220, 0.2)', dark: 'rgba(29, 61, 71, 0.2)' }}
-      headerImage={
+    <>
+      <LoginModal 
+        visible={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
+      />
+      
+      <ParallaxScrollView
+        headerBackgroundColor={{ light: 'rgba(161, 206, 220, 0.2)', dark: 'rgba(29, 61, 71, 0.2)' }}
+        headerImage={
         <View style={[styles.headerContainer,]}>
           {/* <BlurView intensity={10} > */}
 
@@ -444,12 +491,13 @@ export default function HomeScreen() {
 
   <MasonryGrid data={homeServices} columnCount={2} />
       {__DEV__&& <ThemedView style={{flexDirection:"column"}}>
-
+        <Button title='Inject Test Transaction' onPress={injectTestTransaction} />
         <Button title='Testing toast error' onPress={()=>showToast("Error", 'error')} />
       <Button title='Testing toast info' onPress={()=>showToast("Info", 'info')} />
       <Button title='Testing success' onPress={()=>showToast("Success", 'success')} />
       </ThemedView> }
     </ParallaxScrollView>
+    </>
   );
 }
 
@@ -533,7 +581,6 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   serviceLabel: {
-    color: Colors.dark.text,
     fontWeight: '600',
     fontSize: 14,
     marginTop: 16,

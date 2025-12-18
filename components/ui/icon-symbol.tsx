@@ -26,6 +26,7 @@ const MAPPING: Record<string, string> = {
   'checkmark': 'check',
   'checkmark.circle.fill': 'check-circle',
   'tray': 'tray',
+  'globe': 'web',
   // VTU specific (contacts + networks)
   'person.crop.circle': 'account-circle-outline',
   'antenna.radiowaves.left.and.right': 'radio-tower',

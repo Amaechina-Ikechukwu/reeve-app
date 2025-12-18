@@ -6,10 +6,12 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useToast } from '@/contexts/ToastContext';
 import { useUserDetails } from '@/hooks/useUserDetails';
+import { auth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 import * as Linking from 'expo-linking';
 import { openBrowserAsync } from 'expo-web-browser';
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, View, type PressableProps } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View, type PressableProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SettingsScreen() {
@@ -61,6 +63,33 @@ export default function SettingsScreen() {
 		}
 	};
 
+	const handleLogout = () => {
+		Alert.alert(
+			'Log Out',
+			'Are you sure you want to log out?',
+			[
+				{
+					text: 'Cancel',
+					style: 'cancel',
+				},
+				{
+					text: 'Log Out',
+					style: 'destructive',
+					onPress: async () => {
+						try {
+							await signOut(auth);
+							showToast('Logged out successfully', 'success');
+						} catch (error) {
+							console.error('Logout error:', error);
+							showToast('Failed to log out. Please try again.', 'error');
+						}
+					},
+				},
+			],
+			{ cancelable: true }
+		);
+	};
+
 	return (
 		<SafeAreaView style={{ flex: 1 }}>
 			<ScrollView>
@@ -98,6 +127,11 @@ export default function SettingsScreen() {
 				<ExternalLink href="https://reeve.digital/a=privacypolicy" asChild>
 					<Row title="Privacy Policy" icon="lock-outline" />
 				</ExternalLink>
+			</Section>
+
+			{/* Account Actions */}
+			<Section title="Account">
+				<Row title="Log Out" icon="logout" onPress={handleLogout} />
 			</Section>
 				</ThemedView>
 			</ScrollView>

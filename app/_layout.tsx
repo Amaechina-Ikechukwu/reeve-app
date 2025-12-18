@@ -102,7 +102,7 @@ export default function RootLayout() {
               <Stack.Screen name="onboarding/1" options={{ headerShown: false }} />
             ) : (
               <>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Home' }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false, headerBackTitle: '' }} />
                 <Stack.Screen name="auth/verify-email" options={{ headerShown: false }} />
                 <Stack.Screen name="bvn/index" options={{ headerShown: false }} />
                 <Stack.Screen name="bvn/verify-phone" options={{ headerShown: false }} />

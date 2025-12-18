@@ -1,9 +1,10 @@
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import React, { useLayoutEffect } from 'react';
+import { Text, View } from 'react-native';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -72,15 +73,27 @@ const DollarCards = () => (
 export default function CardsScreen() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      headerTitle: 'Cards',
+      headerTitleAlign: 'center',
+      headerBackTitle: '',
+      headerStyle: {
+        backgroundColor: Colors[colorScheme ?? 'light'].background,
+        elevation: 0,
+        shadowOpacity: 0,
+        borderBottomWidth: 1,
+        borderBottomColor: Colors[colorScheme ?? 'light'].icon + '20',
+      },
+      headerTintColor: Colors[colorScheme ?? 'light'].text,
+    });
+  }, [navigation, colorScheme]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors[colorScheme ?? 'light'].background }}>
-      <View style={{ height: 56, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 }}>
-        <Pressable onPress={() => router.back()} style={{ padding: 8 }}>
-          <Text style={{ color: Colors[colorScheme ?? 'light'].tint, fontSize: 18 }}>{'\u2039'}</Text>
-        </Pressable>
-        <Text style={{ fontSize: 18, fontWeight: '600', color: Colors[colorScheme ?? 'light'].text, marginLeft: 8 }}>Cards</Text>
-      </View>
       <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,

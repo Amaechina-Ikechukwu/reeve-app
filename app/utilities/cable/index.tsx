@@ -54,6 +54,7 @@ export default function CableUtilities() {
 			headerShown: true,
 			headerTitle: 'Cable Utilities',
 			headerTitleAlign: 'center',
+			headerBackTitle: '',
 			headerStyle: {
 				backgroundColor: Colors[colorScheme ?? 'light'].background,
 				elevation: 0,

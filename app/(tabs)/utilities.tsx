@@ -25,17 +25,17 @@ export default function UtilitiesScreen() {
 
   // Full services list copied to keep visuals consistent
   const services: ServiceItem[] = [
-    {
-      key: 'crypto',
-      name: 'Crypto',
-      page: '/crypto',
-      icon: 'logo-bitcoin',
-      height: 140,
-      borderColors: ['rgba(247, 147, 26, 0.5)', 'rgba(247, 147, 26, 0.08)', 'rgba(247, 147, 26, 0.04)'] as const,
-      cardColors: ['rgba(247, 147, 26, 0.22)', 'rgba(242, 169, 0, 0.10)'] as const,
-      iconColors: ['#f7931a', '#f2a900'] as const,
-      iconTint: '#ffffff',
-    },
+    // {
+    //   key: 'crypto',
+    //   name: 'Crypto',
+    //   page: '/crypto',
+    //   icon: 'logo-bitcoin',
+    //   height: 140,
+    //   borderColors: ['rgba(247, 147, 26, 0.5)', 'rgba(247, 147, 26, 0.08)', 'rgba(247, 147, 26, 0.04)'] as const,
+    //   cardColors: ['rgba(247, 147, 26, 0.22)', 'rgba(242, 169, 0, 0.10)'] as const,
+    //   iconColors: ['#f7931a', '#f2a900'] as const,
+    //   iconTint: '#ffffff',
+    // },
     {
       key: 'vtu',
       name: 'VTU (Airtime/Data)',
@@ -80,17 +80,17 @@ export default function UtilitiesScreen() {
       iconColors: ['#5ff5c5', '#34d399'] as const,
       iconTint: '#0f2e24',
     },
-    {
-      key: 'gift-cards',
-      name: 'Gift Cards',
-      page: '/gift-cards',
-      icon: 'gift-outline',
-      height: 120,
-      borderColors: ['rgba(6, 182, 212, 0.5)', 'rgba(6, 182, 212, 0.08)', 'rgba(6, 182, 212, 0.04)'] as const,
-      cardColors: ['rgba(97, 215, 245, 0.22)', 'rgba(6, 182, 212, 0.10)'] as const,
-      iconColors: ['#61d7f5', '#06b6d4'] as const,
-      iconTint: '#0a2a32',
-    },
+    // {
+    //   key: 'gift-cards',
+    //   name: 'Gift Cards',
+    //   page: '/gift-cards',
+    //   icon: 'gift-outline',
+    //   height: 120,
+    //   borderColors: ['rgba(6, 182, 212, 0.5)', 'rgba(6, 182, 212, 0.08)', 'rgba(6, 182, 212, 0.04)'] as const,
+    //   cardColors: ['rgba(97, 215, 245, 0.22)', 'rgba(6, 182, 212, 0.10)'] as const,
+    //   iconColors: ['#61d7f5', '#06b6d4'] as const,
+    //   iconTint: '#0a2a32',
+    // },
     {
       key: 'cable',
       name: 'Cable',
