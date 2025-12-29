@@ -1,10 +1,9 @@
 import BankAccountCard from '@/components/BankAccountCard';
+import { DevTestingButtons } from '@/components/DevTestingButtons';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import RecentTransactions from '@/components/transactions/RecentTransactions';
 import { Avatar } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { LoginModal } from '@/components/ui/login-modal';
 import SectionCard from '@/components/ui/SectionCard';
 import { UserStatusChecker } from '@/components/user-status-checker';
@@ -139,18 +138,22 @@ export default function HomeScreen() {
   // Login modal state
   const [showLoginModal, setShowLoginModal] = useState(false);
   
+  // Refresh state
+  const [refreshing, setRefreshing] = useState(false);
+  
   // Check if user is authenticated and show login modal if not
   useEffect(() => {
     const auth = getAuth();
-    const user = auth.currentUser;
     
-    if (!user) {
-      // Show modal after a brief delay to let the UI render
-      const timer = setTimeout(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user || !user.emailVerified) {
         setShowLoginModal(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
+      } else {
+        setShowLoginModal(false);
+      }
+    });
+    
+    return () => unsubscribe();
   }, []);
 
     type Gradient = readonly [string, string] | readonly [string, string, string];
@@ -291,8 +294,20 @@ export default function HomeScreen() {
     }, []);
 
     useEffect(() => {
+      const auth = getAuth();
+      
       const fetchAccountDetails = async () => {
+        const user = auth.currentUser;
+        
+        if (!user) {
+          setAccountData(null);
+          setAccountError('User not authenticated');
+          setAccountLoading(false);
+          return;
+        }
+        
         try {
+          setAccountLoading(true);
           const json = await api.get<AccountDetailsResponse>('/accounts/details', { ttlMs: 15_000, key: 'acct-details' });
           if (json.success) {
             setAccountData(json.data.data);
@@ -306,8 +321,59 @@ export default function HomeScreen() {
         }
       };
 
+      // Initial fetch
       fetchAccountDetails();
+      
+      // Listen to auth state changes
+      const unsubscribe = auth.onAuthStateChanged((user) => {
+        if (user && user.emailVerified) {
+          fetchAccountDetails();
+        } else {
+          setAccountData(null);
+          setAccountLoading(false);
+        }
+      });
+      
+      return () => unsubscribe();
     }, []);
+
+    const handleRefresh = async () => {
+      setRefreshing(true);
+      
+      const auth = getAuth();
+      const user = auth.currentUser;
+      
+      if (!user) {
+        setRefreshing(false);
+        return;
+      }
+      
+      try {
+        // Refetch account details
+        const accountJson = await api.get<AccountDetailsResponse>(
+          '/accounts/details', 
+          { ttlMs: 0, key: 'acct-details' } // ttlMs: 0 forces fresh fetch
+        );
+        if (accountJson.success) {
+          setAccountData(accountJson.data.data);
+        }
+        
+        // Optionally refetch overview data too
+        const overviewJson = await api.get<OverviewApiResponse>(
+          '/users/overview',
+          { ttlMs: 0, key: 'user-overview' }
+        );
+        if (overviewJson.success) {
+          setOverviewData(overviewJson.data);
+        }
+        
+        showToast('Refreshed', 'success');
+      } catch (err) {
+        console.error('Refresh error:', err);
+      } finally {
+        setRefreshing(false);
+      }
+    };
 
     const ServiceCard = ({ item }: { item: ServiceItem }) => (
       <TouchableOpacity
@@ -400,27 +466,6 @@ export default function HomeScreen() {
       return acc;
     };
 
-    const injectTestTransaction = async () => {
-      try {
-        const testTransaction = {
-          amount: Math.floor(Math.random() * 10000) + 1000,
-          type: 'airtime',
-          status: 'completed',
-          description: 'Test Successful Transaction',
-          flow: 'credit',
-        };
-        
-        await api.post('/transactions', testTransaction);
-        showToast('Test transaction injected successfully!', 'success');
-        
-        // Clear the cache to force refresh
-        // You might need to refresh the page or the RecentTransactions component
-      } catch (error) {
-        showToast(error instanceof Error ? error.message : 'Failed to inject transaction', 'error');
-      }
-    };
-
-
   return (
     <>
       <LoginModal 
@@ -430,6 +475,8 @@ export default function HomeScreen() {
       
       <ParallaxScrollView
         headerBackgroundColor={{ light: 'rgba(161, 206, 220, 0.2)', dark: 'rgba(29, 61, 71, 0.2)' }}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
         headerImage={
         <View style={[styles.headerContainer,]}>
           {/* <BlurView intensity={10} > */}
@@ -490,12 +537,7 @@ export default function HomeScreen() {
       </View>
 
   <MasonryGrid data={homeServices} columnCount={2} />
-      {__DEV__&& <ThemedView style={{flexDirection:"column"}}>
-        <Button title='Inject Test Transaction' onPress={injectTestTransaction} />
-        <Button title='Testing toast error' onPress={()=>showToast("Error", 'error')} />
-      <Button title='Testing toast info' onPress={()=>showToast("Info", 'info')} />
-      <Button title='Testing success' onPress={()=>showToast("Success", 'success')} />
-      </ThemedView> }
+      <DevTestingButtons />
     </ParallaxScrollView>
     </>
   );

@@ -16,9 +16,10 @@ import { ThemedTextInput } from './text-input';
 interface LoginModalProps {
   visible: boolean;
   onClose: () => void;
+  onLoginSuccess?: () => void;
 }
 
-export function LoginModal({ visible, onClose }: LoginModalProps) {
+export function LoginModal({ visible, onClose, onLoginSuccess }: LoginModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -47,7 +48,11 @@ export function LoginModal({ visible, onClose }: LoginModalProps) {
       
       showToast('Login successful!', 'success');
       onClose();
-      // UserStatusChecker will handle further redirects
+      
+      // Trigger refresh callback if provided
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      }
     } catch (error: any) {
       const errorMessage = error.code === 'auth/invalid-credential' 
         ? 'Invalid email or password' 

@@ -1,101 +1,138 @@
 import { useTheme } from '@react-navigation/native';
 import React, { useEffect, useRef } from 'react';
-import { Animated, ImageBackground, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+    Animated,
+    Dimensions,
+    ImageBackground,
+    ImageSourcePropType,
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native';
 import { Button } from './button';
 
-type Props = {
-  image: any;
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+export interface OnboardingSlideData {
+  id: string;
+  image: ImageSourcePropType;
   title: string;
   subtitle?: string;
-  children?: React.ReactNode;
-  onPress?: () => void;
-  index?: number;
-  total?: number;
-  onNext?: () => void;
-  onSkip?: () => void;
-  primaryButtonTitle?: string;
-};
+}
 
-export const OnboardingSlide: React.FC<Props> = ({
-  image,
-  title,
-  subtitle,
-  children,
-  onPress,
-  index = 1,
-  total = 3,
+interface OnboardingSlideProps {
+  item: OnboardingSlideData;
+  index: number;
+  total: number;
+  onNext: () => void;
+  onSkip: () => void;
+  isLast: boolean;
+}
+
+export const OnboardingSlide: React.FC<OnboardingSlideProps> = ({
+  item,
+  index,
+  total,
   onNext,
   onSkip,
-  primaryButtonTitle,
+  isLast,
 }) => {
   const theme = useTheme();
-  const overlayColor = (theme as any).dark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.35)';
+  const isDark = theme.dark;
+  const overlayColor = isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)';
 
-  const anim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
-    Animated.timing(anim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
-  }, [anim]);
-
-  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [24, 0] });
-  const opacity = anim;
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 50,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, slideAnim]);
 
   return (
     <ImageBackground
-      source={image}
+      source={item.image}
       style={styles.background}
       imageStyle={styles.imageStyle}
-      blurRadius={Platform.OS === 'web' ? 3 : 20}>
-      <Pressable style={[styles.overlay, { backgroundColor: overlayColor }]} onPress={onPress} disabled={!onPress}>
-        {/* Skip control */}
-        {onSkip ? (
-          <Pressable style={styles.skip} onPress={onSkip} accessibilityLabel="Skip onboarding">
-            <Text style={[styles.skipText, { color: theme.colors.text }]}>Skip</Text>
+      blurRadius={Platform.OS === 'web' ? 3 : 20}
+      resizeMode="cover"
+    >
+      <View style={[styles.overlay, { backgroundColor: overlayColor }]}>
+        {/* Skip Button */}
+        {!isLast && (
+          <Pressable
+            style={styles.skipButton}
+            onPress={onSkip}
+            accessibilityLabel="Skip onboarding"
+            accessibilityRole="button"
+          >
+            <Text style={styles.skipText}>Skip</Text>
           </Pressable>
-        ) : null}
+        )}
 
-        <View style={styles.content} pointerEvents="none">
-          <Animated.Text style={[styles.title, { color: "#f2f2f2", opacity, transform: [{ translateY }] }]}>
-            {title}
-          </Animated.Text>
-          {subtitle ? (
-            <Animated.Text style={[styles.subtitle, { color: "#f2f2f2", opacity, transform: [{ translateY }] }]}>
-              {subtitle}
-            </Animated.Text>
-          ) : null}
-        </View>
+        {/* Content */}
+        <Animated.View
+          style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          <Text style={styles.title}>{item.title}</Text>
+          {item.subtitle && <Text style={styles.subtitle}>{item.subtitle}</Text>}
+        </Animated.View>
 
-        {/* optional children (apps can pass custom cta) */}
-        {children}
-
-        {/* indicators + primary button area */}
-        <View style={styles.bottomRow} pointerEvents="box-none">
+        {/* Bottom Controls */}
+        <View style={styles.bottomContainer}>
+          {/* Page Indicators */}
           <View style={styles.indicators}>
             {Array.from({ length: total }).map((_, i) => {
-              const active = i + 1 === index;
-              return <View key={i} style={[styles.dot, active ? styles.dotActive : null, { opacity: active ? 1 : 0.5 }]} />;
+              const isActive = i === index;
+              return (
+                <View
+                  key={`indicator-${i}`}
+                  style={[
+                    styles.indicator,
+                    isActive && styles.indicatorActive,
+                  ]}
+                />
+              );
             })}
           </View>
 
-        {onNext ? (
-            <Button
-              title={primaryButtonTitle ?? 'Next'}
-              style={styles.primaryButton}
-              onPress={onNext}
-              accessibilityRole="button"
-            />
-          ) : null}
+          {/* Action Button */}
+          <Button
+            title={isLast ? 'Get Started' : 'Next'}
+            style={styles.actionButton}
+            onPress={onNext}
+            accessibilityRole="button"
+            accessibilityLabel={isLast ? 'Get started' : 'Next slide'}
+          />
         </View>
-          
-      </Pressable>
+      </View>
     </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   background: {
+    width: SCREEN_WIDTH,
     flex: 1,
-    justifyContent: 'center',
   },
   imageStyle: {
     resizeMode: 'cover',
@@ -106,75 +143,73 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 24,
   },
-  content: {
-    maxWidth: 900,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 52,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 12,
-    lineHeight: 58,
-    width:230
-  },
-  subtitle: {
-    fontSize: 18,
-    textAlign: 'center',
-    opacity: 0.9,
-  },
-  skip: {
+  skipButton: {
     position: 'absolute',
-    top: 48,
+    top: Platform.OS === 'ios' ? 60 : 48,
     right: 24,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 20,
+    zIndex: 10,
   },
   skipText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
-    opacity: 0.95,
+    color: '#FFFFFF',
   },
-  bottomRow: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 36,
-    flexDirection: 'column',
+  content: {
+    maxWidth: 600,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    gap:10
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: '700',
+    textAlign: 'center',
+    color: '#FFFFFF',
+    marginBottom: 16,
+    lineHeight: 40,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 17,
+    fontWeight: '400',
+    textAlign: 'center',
+    color: '#FFFFFF',
+    opacity: 0.9,
+    lineHeight: 24,
+  },
+  bottomContainer: {
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 50 : 40,
+    left: 24,
+    right: 24,
+    alignItems: 'center',
+    gap: 24,
   },
   indicators: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    gap: 8,
   },
-  dot: {
+  indicator: {
     width: 8,
     height: 8,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    marginHorizontal: 6,
-    opacity: 0.5,
+    borderRadius: 4,
+    backgroundColor: '#FFFFFF',
+    opacity: 0.4,
   },
-  dotActive: {
-    width: 18,
-    borderRadius: 9,
-    backgroundColor: '#fff',
+  indicatorActive: {
+    width: 24,
     opacity: 1,
   },
-  primaryButton: {
-    backgroundColor: '#000',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+  actionButton: {
+    minWidth: 200,
+    backgroundColor: '#000000',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
     borderRadius: 999,
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontWeight: '700',
   },
 });

@@ -3,20 +3,42 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Avatar } from '@/components/ui/avatar';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { LoginModal } from '@/components/ui/login-modal';
 import { Colors } from '@/constants/theme';
 import { useToast } from '@/contexts/ToastContext';
-import { useUserDetails } from '@/hooks/useUserDetails';
 import { auth } from '@/firebase';
-import { signOut } from 'firebase/auth';
+import { useUserDetails } from '@/hooks/useUserDetails';
 import * as Linking from 'expo-linking';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { openBrowserAsync } from 'expo-web-browser';
-import { useMemo } from 'react';
+import { signOut } from 'firebase/auth';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View, type PressableProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SettingsScreen() {
-	const { userDetails } = useUserDetails();
+	const { userDetails, refresh } = useUserDetails();
     const { showToast } = useToast();
+	const router = useRouter();
+	const [showLoginModal, setShowLoginModal] = useState(false);
+
+	useFocusEffect(
+		useCallback(() => {
+			// Check auth state every time screen is focused
+			const user = auth.currentUser;
+			if (!user || !user.emailVerified) {
+				setShowLoginModal(true);
+			} else {
+				setShowLoginModal(false);
+			}
+		}, [])
+	);
+
+	const handleLoginSuccess = useCallback(() => {
+		// Refresh user details after successful login
+		refresh();
+		setShowLoginModal(false);
+	}, [refresh]);
 
 	const SUPPORT_EMAIL = useMemo(() => 'support@reeve.app', []);
 	const WHATSAPP_NUMBER = useMemo(() => '+2348012345678', []); // kept for display
@@ -79,6 +101,8 @@ export default function SettingsScreen() {
 						try {
 							await signOut(auth);
 							showToast('Logged out successfully', 'success');
+							// Navigate to login screen and prevent going back
+							router.replace('/auth/login');
 						} catch (error) {
 							console.error('Logout error:', error);
 							showToast('Failed to log out. Please try again.', 'error');
@@ -92,6 +116,11 @@ export default function SettingsScreen() {
 
 	return (
 		<SafeAreaView style={{ flex: 1 }}>
+			<LoginModal 
+				visible={showLoginModal} 
+				onClose={() => setShowLoginModal(false)}
+				onLoginSuccess={handleLoginSuccess}
+			/>
 			<ScrollView>
 				<ThemedView style={styles.container}>
 			{/* User details */}

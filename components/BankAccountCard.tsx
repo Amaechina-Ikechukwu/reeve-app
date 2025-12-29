@@ -54,7 +54,7 @@ export const BankAccountCard: React.FC<Props> = ({ accountData, accountLoading, 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View style={{ flex: 1 }}>
             <Text style={{ color: '#EAF4F6', fontSize: 16, fontWeight: '700' }}>
-              {accountData?.bank_name ?? (accountLoading ? 'Loading…' : accountError ? 'Unavailable' : 'Bank')}
+              {accountData?.bank_name ?? (accountLoading ? 'Loading…' : accountError ? 'Login required' : 'Bank')}
             </Text>
             <Text style={{ color: '#D1E6EA', fontSize: 13, opacity: 0.9, marginTop: 4 }}>
               {accountData?.account_number ? formatAccountNumber(accountData.account_number) : '•••• ••• •••'}

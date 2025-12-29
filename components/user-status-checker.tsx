@@ -25,11 +25,7 @@ export function UserStatusChecker() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setEmailVerified(user.emailVerified);
-        
-        // If email is not verified, redirect to email verification page
-        if (!user.emailVerified) {
-          router.replace('/auth/verify-email');
-        }
+        // Note: Email verification redirect is now handled in _layout.tsx
       }
     });
 
