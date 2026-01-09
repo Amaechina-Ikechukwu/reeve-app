@@ -36,15 +36,22 @@ if (missingKeys.length > 0) {
     console.log('Firebase configuration loaded successfully');
 }
 
+// Only initialize Firebase if all required config values are present
+let app;
+let auth: any;
+let database: any;
+let storage: any;
 
+if (missingKeys.length === 0) {
+    app = initializeApp(firebaseConfig);
+    auth = initializeAuth(app, {
+        persistence: getReactNativePersistence(AsyncStorage),
+    });
+    database = getDatabase(app);
+    storage = getStorage(app);
+} else {
+    console.error('Firebase not initialized due to missing configuration');
+}
 
+export { auth, database, storage };
 
-
-const app = initializeApp(firebaseConfig);
-
-export const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
-
-export const database = getDatabase(app);
-export const storage = getStorage();

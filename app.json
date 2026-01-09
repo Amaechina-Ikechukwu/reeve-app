@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "reeve-app",
+    "name": "Reeve",
     "slug": "reeve-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "reeveapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ikaychina.reeveapp",
@@ -47,7 +47,6 @@
       "expo-secure-store",
       "expo-font",
       "expo-web-browser",
-      "@sentry/react-native",
       [
         "@sentry/react-native/expo",
         {
@@ -59,7 +58,7 @@
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     },
     "extra": {
       "router": {},
