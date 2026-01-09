@@ -1,4 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import * as Sentry from '@sentry/react-native';
 import { Stack } from 'expo-router';
 import * as ExpoSplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -7,6 +8,16 @@ import 'react-native-reanimated';
 
 import { ToastProvider } from '@/contexts/ToastContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+
+// Initialize Sentry
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+  // Adjust this value in production.
+  tracesSampleRate: 1.0,
+  // Disable in development
+  enabled: !__DEV__,
+});
 
 // Prevent the splash screen from auto-hiding
 ExpoSplashScreen.preventAutoHideAsync().catch((error) => {
@@ -17,7 +28,7 @@ export const unstable_settings = {
   initialRouteName: 'index',
 };
 
-export default function RootLayout() {
+function RootLayout() {
   const colorScheme = useColorScheme();
 
   // Hide splash screen immediately
@@ -47,3 +58,6 @@ export default function RootLayout() {
     </ToastProvider>
   );
 }
+
+// Wrap with Sentry for error boundary
+export default Sentry.wrap(RootLayout);
