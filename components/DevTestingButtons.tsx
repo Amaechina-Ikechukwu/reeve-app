@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/contexts/ToastContext';
 import { api } from '@/lib/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { Alert } from 'react-native';
-
 export function DevTestingButtons() {
   const { showToast } = useToast();
   const router = useRouter();
@@ -58,12 +58,27 @@ export function DevTestingButtons() {
   }
 
   return (
-    <ThemedView style={{ flexDirection: 'column', gap: 8, marginTop: 16 }}>
-      <Button title='Inject Test Transaction' onPress={injectTestTransaction} />
-      <Button title='Testing toast error' onPress={() => showToast("Error", 'error')} />
-      <Button title='Testing toast info' onPress={() => showToast("Info", 'info')} />
-      <Button title='Testing success' onPress={() => showToast("Success", 'success')} />
-      <Button title='Clear App & Restart' onPress={clearAppData} />
+    <ThemedView style={{ flexDirection: "column", gap: 8, marginTop: 16 }}>
+      <Button title="Inject Test Transaction" onPress={injectTestTransaction} />
+      <Button
+        title="Testing toast error"
+        onPress={() => showToast("Error", "error")}
+      />
+      <Button
+        title="Testing toast info"
+        onPress={() => showToast("Info", "info")}
+      />
+      <Button
+        title="Testing success"
+        onPress={() => showToast("Success", "success")}
+      />
+      <Button title="Clear App & Restart" onPress={clearAppData} />
+      <Button
+        title="Try!"
+        onPress={() => {
+          Sentry.captureException(new Error("First error"));
+        }}
+      />
     </ThemedView>
   );
 }

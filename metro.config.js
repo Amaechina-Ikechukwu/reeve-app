@@ -1,15 +1,11 @@
-const { getDefaultConfig } = require('@expo/metro-config');
-const { withSentryConfig } = require('@sentry/react-native/metro');
+const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 
-const defaultConfig = getDefaultConfig(__dirname);
+const config = getSentryExpoConfig(__dirname);
 
 // Add TypeScript extensions
-defaultConfig.resolver.sourceExts.push('ts', 'tsx', 'cjs');
-
-// Ensure TypeScript files are transformed properly
-defaultConfig.transformer.babelTransformerPath = require.resolve('@expo/metro-config/babel-transformer');
+config.resolver.sourceExts.push('ts', 'tsx', 'cjs');
 
 // This is the new line you should add in, after the previous lines
-defaultConfig.resolver.unstable_enablePackageExports = false;
+config.resolver.unstable_enablePackageExports = false;
 
-module.exports = withSentryConfig(defaultConfig);
+module.exports = config;
